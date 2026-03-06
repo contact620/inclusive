@@ -16,7 +16,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
+    <div className="mx-auto max-w-2xl space-y-6 p-6 lg:p-10">
       <h1 className="text-2xl font-bold text-gray-900">Mon profil</h1>
 
       <Card>

@@ -24,11 +24,11 @@ export default async function ProjectDetailPage({ params }: Props) {
   const projectDocs = mockDocuments.filter((d) => d.project_id === id);
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-4xl space-y-6 p-6 lg:p-10">
       {/* Header */}
       <div>
         <Link
-          href="/portal/projects"
+          href="/projects"
           className="mb-2 inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700"
         >
           ← Retour aux projets
@@ -106,7 +106,7 @@ export default async function ProjectDetailPage({ params }: Props) {
               <div className="flex items-center justify-between">
                 <CardTitle>Documents ({projectDocs.length})</CardTitle>
                 <Link
-                  href="/portal/documents"
+                  href="/documents"
                   className="text-sm text-blue-600 hover:underline"
                 >
                   Gérer les documents
@@ -130,7 +130,7 @@ export default async function ProjectDetailPage({ params }: Props) {
                             {doc.name}
                           </p>
                           <p className="text-xs text-gray-500">
-                            {formatFileSize(doc.file_size)} • {formatDateTime(doc.created_at)}
+                            {formatFileSize(doc.file_size)} · {formatDateTime(doc.created_at)}
                           </p>
                         </div>
                         <Badge

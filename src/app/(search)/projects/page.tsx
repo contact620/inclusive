@@ -9,7 +9,7 @@ import type { ProjectType } from "@/types";
 
 export default function ProjectsPage() {
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-3xl space-y-6 p-6 lg:p-10">
       <h1 className="text-2xl font-bold text-gray-900">Mes projets</h1>
 
       <div className="space-y-4">
@@ -24,7 +24,7 @@ export default function ProjectsPage() {
           const stageConfig = PROJECT_STAGES[stageIndex];
 
           return (
-            <Link key={project.id} href={`/portal/projects/${project.id}`}>
+            <Link key={project.id} href={`/projects/${project.id}`}>
               <Card className="transition-shadow hover:shadow-md">
                 <CardContent>
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

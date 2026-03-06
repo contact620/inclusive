@@ -123,7 +123,7 @@ export const mockNotifications: Notification[] = [
     title: "Projet mis à jour",
     message: "Votre dossier de financement pour l'appartement Oberkampf a été transmis à la banque.",
     read: false,
-    link: "/portal/projects/proj-001",
+    link: "/projects/proj-001",
     created_at: "2025-03-02T14:00:00Z",
   },
   {
@@ -133,7 +133,7 @@ export const mockNotifications: Notification[] = [
     title: "Document demandé",
     message: "Merci de déposer votre avis d'imposition 2024 pour compléter le dossier de financement.",
     read: false,
-    link: "/portal/documents",
+    link: "/documents",
     created_at: "2025-03-01T10:00:00Z",
   },
   {
@@ -143,7 +143,7 @@ export const mockNotifications: Notification[] = [
     title: "Rendez-vous confirmé",
     message: "Visite du bien au 45 Rue Oberkampf confirmée le 5 mars à 14h.",
     read: true,
-    link: "/portal/projects/proj-001",
+    link: "/projects/proj-001",
     created_at: "2025-02-28T09:00:00Z",
   },
   {
@@ -153,7 +153,7 @@ export const mockNotifications: Notification[] = [
     title: "Compromis signé",
     message: "Le compromis de vente pour l'appartement Oberkampf a bien été signé par toutes les parties.",
     read: true,
-    link: "/portal/documents",
+    link: "/documents",
     created_at: "2025-02-20T16:00:00Z",
   },
   {
