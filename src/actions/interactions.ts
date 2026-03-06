@@ -1,10 +1,15 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { DEMO_MODE, mockInteractions } from "@/lib/mock-data";
 import type { InteractionType } from "@/types";
 
 export async function getInteractionsByClient(clientId: string) {
+  if (DEMO_MODE) {
+    return mockInteractions.filter((i) => i.client_id === clientId);
+  }
+
+  const { createClient } = await import("@/lib/supabase/server");
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -18,6 +23,20 @@ export async function getInteractionsByClient(clientId: string) {
 }
 
 export async function getAllInteractions(page: number = 1, perPage: number = 20) {
+  if (DEMO_MODE) {
+    const sorted = [...mockInteractions].sort(
+      (a, b) => new Date(b.occurred_at).getTime() - new Date(a.occurred_at).getTime()
+    );
+    const from = (page - 1) * perPage;
+    const paged = sorted.slice(from, from + perPage);
+    return {
+      interactions: paged,
+      total: sorted.length,
+      totalPages: Math.ceil(sorted.length / perPage),
+    };
+  }
+
+  const { createClient } = await import("@/lib/supabase/server");
   const supabase = await createClient();
   const from = (page - 1) * perPage;
   const to = from + perPage - 1;
@@ -38,6 +57,11 @@ export async function getAllInteractions(page: number = 1, perPage: number = 20)
 }
 
 export async function createInteractionAction(formData: FormData) {
+  if (DEMO_MODE) {
+    return { success: true };
+  }
+
+  const { createClient } = await import("@/lib/supabase/server");
   const supabase = await createClient();
 
   const {
@@ -64,7 +88,6 @@ export async function createInteractionAction(formData: FormData) {
 
   if (error) return { error: error.message };
 
-  // Log activity
   await supabase.from("activity_log").insert({
     user_id: user.id,
     action: "interaction_created",
@@ -81,6 +104,11 @@ export async function createInteractionAction(formData: FormData) {
 }
 
 export async function deleteInteractionAction(id: string, clientId: string) {
+  if (DEMO_MODE) {
+    return { success: true };
+  }
+
+  const { createClient } = await import("@/lib/supabase/server");
   const supabase = await createClient();
 
   const {

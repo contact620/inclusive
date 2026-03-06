@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { logout } from "@/actions/auth";
 import { Avatar } from "@/components/ui/avatar";
 import type { Profile } from "@/types";
 
@@ -14,10 +14,9 @@ interface TopbarProps {
 export function Topbar({ profile, onMenuClick }: TopbarProps) {
   const [showMenu, setShowMenu] = useState(false);
   const router = useRouter();
-  const supabase = createClient();
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await logout();
     router.push("/login");
   };
 

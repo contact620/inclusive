@@ -2,24 +2,35 @@
 
 import { useState } from "react";
 import { useUser } from "@/hooks/use-user";
-import { createClient } from "@/lib/supabase/client";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ROLES } from "@/lib/constants";
 
+const DEMO_MODE =
+  !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+  process.env.NEXT_PUBLIC_SUPABASE_URL === "your_supabase_url_here";
+
 export default function SettingsPage() {
   const { profile } = useUser();
   const [fullName, setFullName] = useState(profile?.full_name ?? "");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
-  const supabase = createClient();
 
   async function handleUpdateProfile() {
     if (!profile) return;
     setLoading(true);
     setMessage(null);
+
+    if (DEMO_MODE) {
+      setMessage("Mode démo : profil mis à jour (simulation)");
+      setLoading(false);
+      return;
+    }
+
+    const { createClient } = await import("@/lib/supabase/client");
+    const supabase = createClient();
 
     const { error } = await supabase
       .from("profiles")

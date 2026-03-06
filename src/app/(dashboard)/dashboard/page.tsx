@@ -1,47 +1,68 @@
-import { createClient } from "@/lib/supabase/server";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { StatusChart } from "@/components/dashboard/status-chart";
 import { RecentActivity } from "@/components/dashboard/recent-activity";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import {
+  DEMO_MODE,
+  mockClients,
+  mockInteractions,
+  mockActivityLog,
+} from "@/lib/mock-data";
 
-export default async function DashboardPage() {
+async function getDashboardData() {
+  if (DEMO_MODE) {
+    const counts: Record<string, number> = {};
+    mockClients.forEach((c) => {
+      counts[c.status] = (counts[c.status] || 0) + 1;
+    });
+    const statusData = Object.entries(counts).map(([status, count]) => ({
+      status,
+      count,
+    }));
+
+    return {
+      totalClients: mockClients.length,
+      totalInteractions: mockInteractions.length,
+      statusData,
+      activities: mockActivityLog,
+    };
+  }
+
+  const { createClient } = await import("@/lib/supabase/server");
   const supabase = await createClient();
 
-  // Fetch stats in parallel
-  const [clientsResult, statusResult, interactionsResult, activityResult] =
-    await Promise.all([
-      supabase.from("clients").select("*", { count: "exact", head: true }),
-      supabase.rpc("get_client_status_counts").select("*"),
-      supabase.from("interactions").select("*", { count: "exact", head: true }),
-      supabase
-        .from("activity_log")
-        .select("*, profiles(id, full_name)")
-        .order("created_at", { ascending: false })
-        .limit(10),
-    ]);
+  const [clientsResult, interactionsResult, activityResult] = await Promise.all([
+    supabase.from("clients").select("*", { count: "exact", head: true }),
+    supabase.from("interactions").select("*", { count: "exact", head: true }),
+    supabase
+      .from("activity_log")
+      .select("*, profiles(id, full_name)")
+      .order("created_at", { ascending: false })
+      .limit(10),
+  ]);
 
-  const totalClients = clientsResult.count ?? 0;
-  const totalInteractions = interactionsResult.count ?? 0;
+  const { data: clientsData } = await supabase.from("clients").select("status");
+  const counts: Record<string, number> = {};
+  clientsData?.forEach((c) => {
+    counts[c.status] = (counts[c.status] || 0) + 1;
+  });
+  const statusData = Object.entries(counts).map(([status, count]) => ({
+    status,
+    count,
+  }));
 
-  // Fallback if RPC doesn't exist: query manually
-  let statusData = statusResult.data ?? [];
-  if (statusData.length === 0) {
-    const { data } = await supabase
-      .from("clients")
-      .select("status");
+  return {
+    totalClients: clientsResult.count ?? 0,
+    totalInteractions: interactionsResult.count ?? 0,
+    statusData,
+    activities: activityResult.data ?? [],
+  };
+}
 
-    if (data) {
-      const counts: Record<string, number> = {};
-      data.forEach((c) => {
-        counts[c.status] = (counts[c.status] || 0) + 1;
-      });
-      statusData = Object.entries(counts).map(([status, count]) => ({
-        status,
-        count,
-      }));
-    }
-  }
+export default async function DashboardPage() {
+  const { totalClients, totalInteractions, statusData, activities } =
+    await getDashboardData();
 
   return (
     <div className="space-y-6">
@@ -73,7 +94,7 @@ export default async function DashboardPage() {
         />
         <StatCard
           label="Clients actifs"
-          value={statusData.find((s: { status: string; count: number }) => s.status === "active")?.count ?? 0}
+          value={statusData.find((s) => s.status === "active")?.count ?? 0}
           icon={
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -84,7 +105,7 @@ export default async function DashboardPage() {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <StatusChart data={statusData} total={totalClients} />
-        <RecentActivity activities={activityResult.data ?? []} />
+        <RecentActivity activities={activities} />
       </div>
     </div>
   );

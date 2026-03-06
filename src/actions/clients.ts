@@ -1,8 +1,8 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { DEMO_MODE, mockClients } from "@/lib/mock-data";
 import type { ClientStatus } from "@/types";
 
 interface GetClientsParams {
@@ -18,6 +18,29 @@ export async function getClients({
   page = 1,
   perPage = 10,
 }: GetClientsParams = {}) {
+  if (DEMO_MODE) {
+    let filtered = [...mockClients];
+    if (search) {
+      filtered = filtered.filter((c) =>
+        c.name.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+    if (status) {
+      filtered = filtered.filter((c) => c.status === status);
+    }
+    const total = filtered.length;
+    const from = (page - 1) * perPage;
+    const paged = filtered.slice(from, from + perPage);
+    return {
+      clients: paged,
+      total,
+      page,
+      perPage,
+      totalPages: Math.ceil(total / perPage),
+    };
+  }
+
+  const { createClient } = await import("@/lib/supabase/server");
   const supabase = await createClient();
   const from = (page - 1) * perPage;
   const to = from + perPage - 1;
@@ -50,6 +73,13 @@ export async function getClients({
 }
 
 export async function getClientById(id: string) {
+  if (DEMO_MODE) {
+    const client = mockClients.find((c) => c.id === id);
+    if (!client) throw new Error("Client introuvable");
+    return client;
+  }
+
+  const { createClient } = await import("@/lib/supabase/server");
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -63,6 +93,12 @@ export async function getClientById(id: string) {
 }
 
 export async function createClientAction(formData: FormData) {
+  if (DEMO_MODE) {
+    // En mode démo, simuler la création et rediriger
+    redirect("/clients/client-001");
+  }
+
+  const { createClient } = await import("@/lib/supabase/server");
   const supabase = await createClient();
 
   const {
@@ -89,7 +125,6 @@ export async function createClientAction(formData: FormData) {
 
   if (error) return { error: error.message };
 
-  // Log activity
   await supabase.from("activity_log").insert({
     user_id: user.id,
     action: "client_created",
@@ -104,6 +139,11 @@ export async function createClientAction(formData: FormData) {
 }
 
 export async function updateClientAction(id: string, formData: FormData) {
+  if (DEMO_MODE) {
+    redirect(`/clients/${id}`);
+  }
+
+  const { createClient } = await import("@/lib/supabase/server");
   const supabase = await createClient();
 
   const {
@@ -128,7 +168,6 @@ export async function updateClientAction(id: string, formData: FormData) {
 
   if (error) return { error: error.message };
 
-  // Log activity
   await supabase.from("activity_log").insert({
     user_id: user.id,
     action: "client_updated",
@@ -144,6 +183,11 @@ export async function updateClientAction(id: string, formData: FormData) {
 }
 
 export async function deleteClientAction(id: string) {
+  if (DEMO_MODE) {
+    redirect("/clients");
+  }
+
+  const { createClient } = await import("@/lib/supabase/server");
   const supabase = await createClient();
 
   const {
@@ -155,7 +199,6 @@ export async function deleteClientAction(id: string) {
 
   if (error) return { error: error.message };
 
-  // Log activity
   await supabase.from("activity_log").insert({
     user_id: user.id,
     action: "client_deleted",

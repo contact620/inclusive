@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -21,9 +22,9 @@ export function Sidebar({ className }: { className?: string }) {
         className
       )}
     >
-      <div className="flex h-16 items-center border-b border-gray-200 px-6">
-        <Link href="/dashboard" className="text-xl font-bold text-blue-600">
-          Inclusive
+      <div className="flex h-16 items-center border-b border-gray-200 px-4">
+        <Link href="/dashboard" className="flex w-full items-center">
+          <Image src="/logo.png" alt="Inclusive" width={0} height={0} sizes="100%" className="h-12 w-auto" />
         </Link>
       </div>
       <nav className="flex-1 space-y-1 px-3 py-4">

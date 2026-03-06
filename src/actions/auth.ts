@@ -1,9 +1,14 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { DEMO_MODE } from "@/lib/mock-data";
 
 export async function login(formData: FormData) {
+  if (DEMO_MODE) {
+    redirect("/dashboard");
+  }
+
+  const { createClient } = await import("@/lib/supabase/server");
   const supabase = await createClient();
 
   const { error } = await supabase.auth.signInWithPassword({
@@ -19,6 +24,11 @@ export async function login(formData: FormData) {
 }
 
 export async function signup(formData: FormData) {
+  if (DEMO_MODE) {
+    redirect("/dashboard");
+  }
+
+  const { createClient } = await import("@/lib/supabase/server");
   const supabase = await createClient();
 
   const { error } = await supabase.auth.signUp({
@@ -39,6 +49,11 @@ export async function signup(formData: FormData) {
 }
 
 export async function logout() {
+  if (DEMO_MODE) {
+    redirect("/login");
+  }
+
+  const { createClient } = await import("@/lib/supabase/server");
   const supabase = await createClient();
   await supabase.auth.signOut();
   redirect("/login");
